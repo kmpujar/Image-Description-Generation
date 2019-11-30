@@ -85,11 +85,11 @@ def train_attention_model(vocab_len, train_loader, val_loader):
                                                  lr=encoder_lr)
 
     # Move to GPU, if available
-    # decoder = decoder.to(device)
-    # encoder = encoder.to(device)
+    decoder = decoder.to(device)
+    encoder = encoder.to(device)
 
     # Loss function
-    criterion = nn.CrossEntropyLoss()#.to(device)
+    criterion = nn.CrossEntropyLoss().to(device)
 
     for epoch in range(start_epoch, epochs):
 
@@ -151,9 +151,9 @@ def train(train_loader, encoder, decoder, criterion, encoder_optimizer, decoder_
         # print(type(caplens))
         # Move to GPU, if available
         # print("Img type : ",type(imgs))
-        # imgs = imgs.to(device)
-        # caps = caps.to(device)
-        # caplens = caplens.to(device)
+        imgs = imgs.to(device)
+        caps = caps.to(device)
+        caplens = caplens.to(device)
 
         # Forward prop.
         imgs = encoder(imgs)
@@ -230,9 +230,9 @@ def validate(val_loader, encoder, decoder, criterion):
         for i, (imgs, caps, caplens, allcaps) in enumerate(val_loader):
 
             # Move to device, if available
-            # imgs = imgs.to(device)
-            # caps = caps.to(device)
-            # caplens = caplens.to(device)
+            imgs = imgs.to(device)
+            caps = caps.to(device)
+            caplens = caplens.to(device)
 
             # Forward prop.
             if encoder is not None:

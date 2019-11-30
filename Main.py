@@ -35,8 +35,8 @@ class Main():
         torch.manual_seed(42)
         self.train_dataset, self.val_dataset, self.test_dataset = self.get_dataset()
 
-        self.enc_model = EncoderModel(self.embed_size)#.to(device)
-        self.dec_model = DecoderModel(self.embed_size , self.hidden_size, self.vocab_size, self.num_layers)#.to(device)
+        self.enc_model = EncoderModel(self.embed_size).to(device)
+        self.dec_model = DecoderModel(self.embed_size , self.hidden_size, self.vocab_size, self.num_layers).to(device)
 
         self.params = list(self.dec_model.parameters()) + list(self.enc_model.linear.parameters()) + list(self.enc_model.bn.parameters())
         self.optimizer = torch.optim.Adam(self.params, lr=self.learning_rate)
@@ -134,8 +134,8 @@ class Main():
             for i, (images, captions, lengths) in enumerate(train_data_loader):
                 self.enc_model.train()
                 self.dec_model.train()
-                # images = images.to(device)
-                # captions = captions.to(device)
+                images = images.to(device)
+                captions = captions.to(device)
 
                 features = self.enc_model(images)
                 outputs = self.dec_model(features, captions, lengths)
@@ -182,8 +182,8 @@ class Main():
         self.dec_model.eval()
         val_loss = 0.0
         for i, (images, captions, lengths) in enumerate(val_data_loader):
-            # images = images.to(device)
-            # captions = captions.to(device)
+            images = images.to(device)
+            captions = captions.to(device)
 
             features = self.enc_model(images)
             outputs = self.dec_model(features, captions, lengths)
@@ -211,8 +211,8 @@ class Main():
         print(captions)
         plt.imshow(np.transpose(img, (1, 2, 0)))
         plt.show()
-        # images = images.to(device)
-        # captions = captions.to(device)
+        images = images.to(device)
+        captions = captions.to(device)
         for t in captions:
             for val in t:
                 print(self.vocab.itos[val],end=" ")

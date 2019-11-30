@@ -122,8 +122,8 @@ class AttentionDecoder(nn.Module):
         # Using length - 1 to not include <end>
         decoder_length = (caption_len - 1).tolist()
         # print("Decoder length : ",decoder_length)
-        pred = torch.zeros(batch_size, max(decoder_length), vocab_size)#.to(device)
-        alphas = torch.zeros(batch_size, max(decoder_length), num_pixels)#.to(device)
+        pred = torch.zeros(batch_size, max(decoder_length), vocab_size).to(device)
+        alphas = torch.zeros(batch_size, max(decoder_length), num_pixels).to(device)
         # print("Pred Size : ",pred.size())
         # print("Alpha Size : ",alphas.size())
         # Dynamic batching used here. We use lstm cell which runs over only one time step at once. We only go through samples which doesn't have <pad> at that timestep.
