@@ -11,6 +11,7 @@ from pycocotools.coco import COCO
 from Image_Description.DataLoader import CocoDataset
 from torch.nn.utils.rnn import pack_padded_sequence
 import matplotlib.pyplot as plt
+from dataloader_attention import CaptionDataset
 import nltk
 
 device = torch.device('cuda')
@@ -25,7 +26,7 @@ class Main():
         self.embed_size = 128
         self.hidden_size = 128
         self.num_layers = 1
-        self.learning_rate = 0.001
+        self.learning_rate = 0.
         self.criterion = nn.CrossEntropyLoss()
         self.num_epochs = 10
         self.vocab = self.build_vocab(self.json, self.minCount)
@@ -68,13 +69,13 @@ class Main():
 
         return transform
 
-    def collate_fn(self, data):
+    def collate_fn(self, data, ):
         """Creates mini-batch tensors from the list of tuples (image, caption).
         """
 
         # Sort a data list by caption length (descending order).
         data.sort(key=lambda x: len(x[1]), reverse=True)
-        images, captions = zip(*data)
+        images, captions, all_captions= zip(*data)
 
         # Merge images (from tuple of 3D tensor to 4D tensor).
         images = torch.stack(images, 0)
@@ -88,6 +89,27 @@ class Main():
             targets[i, :end] = cap[:end]
 
         return images, targets, lengths
+
+    def collate_fn_val(self, data, ):
+        """Creates mini-batch tensors from the list of tuples (image, caption).
+        """
+
+        # Sort a data list by caption length (descending order).
+        data.sort(key=lambda x: len(x[1]), reverse=True)
+        images, captions, all_captions= zip(*data)
+
+        # Merge images (from tuple of 3D tensor to 4D tensor).
+        images = torch.stack(images, 0)
+
+        # Merge captions (from tuple of 1D tensor to 2D tensor).
+        lengths = [len(cap) for cap in captions]
+        targets = torch.zeros(len(captions), max(lengths)).long()
+
+        for i, cap in enumerate(captions):
+            end = lengths[i]
+            targets[i, :end] = cap[:end]
+
+        return images, targets, lengths, all_captions
 
     def get_dataset(self):
 
@@ -139,6 +161,15 @@ class Main():
                                                         shuffle=True, collate_fn=self.collate_fn)
         val_data_loader = torch.utils.data.DataLoader(dataset=self.val_dataset, batch_size=self.batch_size,
                                                       shuffle=True, collate_fn=self.collate_fn)
+
+        normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                         std=[0.229, 0.224, 0.225])
+        val_data_loader = torch.utils.data.DataLoader(
+            CaptionDataset('valid', transform=transforms.Compose([normalize])),
+            batch_size=self.batch_size, shuffle=False, pin_memory=True)
+        print(val_data_loader)
+        print(len(val_data_loader))
+        exit(0)
         train_attention_model(self.vocab_size, train_data_loader, val_data_loader)
 
 
@@ -184,7 +215,7 @@ class Main():
         # captions = captions.to(device)
         for t in captions:
             for val in t:
-                print(self.vocab.itos[val],end=" ")  
+                print(self.vocab.itos[val],end=" ")
             break
         print()
         features = enc_model_saved(images)
@@ -202,6 +233,6 @@ class Main():
 if __name__ == '__main__':
 
     main = Main()
-    # main.train_attention()
+    main.train_attention()
    # main.evaluate()
-    main.train()
+   #  main.train()

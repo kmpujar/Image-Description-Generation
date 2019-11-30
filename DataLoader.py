@@ -23,6 +23,7 @@ class CocoDataset(data.Dataset):
         self.ids = list(self.coco.anns.keys())
         self.vocab = vocab
         self.transform = transform
+        self.cpi = 1
 
     def __getitem__(self, index):
         """Returns one data pair (image and caption)."""
@@ -32,6 +33,8 @@ class CocoDataset(data.Dataset):
         ann_id = self.ids[index]
         caption = coco.anns[ann_id]['caption']
         img_id = coco.anns[ann_id]['image_id']
+        x = coco.anns[ann_id]['captions_per_image']
+        print(len(x))
         path = coco.loadImgs(img_id)[0]['file_name']
 
         image = Image.open(os.path.join(self.root, path)).convert('RGB')
@@ -45,7 +48,9 @@ class CocoDataset(data.Dataset):
         caption.extend([vocab.stoi[token] for token in tokens])
         caption.append(vocab.stoi['<end>'])
         target = torch.Tensor(caption)
-        return image, target
+        all_captions = torch.LongTensor(
+            self.captions[((index // self.cpi) * self.cpi):(((index // self.cpi) * self.cpi) + self.cpi)])
+        return image, target, all_captions
 
     def __len__(self):
         return len(self.ids)
