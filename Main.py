@@ -160,16 +160,16 @@ class Main():
         train_data_loader = torch.utils.data.DataLoader(dataset=self.train_dataset, batch_size=self.batch_size,
                                                         shuffle=True, collate_fn=self.collate_fn)
         val_data_loader = torch.utils.data.DataLoader(dataset=self.val_dataset, batch_size=self.batch_size,
-                                                      shuffle=True, collate_fn=self.collate_fn)
+                                                      shuffle=True, collate_fn=self.collate_fn_val)
 
-        normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                         std=[0.229, 0.224, 0.225])
-        val_data_loader = torch.utils.data.DataLoader(
-            CaptionDataset('valid', transform=transforms.Compose([normalize])),
-            batch_size=self.batch_size, shuffle=False, pin_memory=True)
-        print(val_data_loader)
-        print(len(val_data_loader))
-        exit(0)
+        # normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+        #                                  std=[0.229, 0.224, 0.225])
+        # val_data_loader = torch.utils.data.DataLoader(
+        #     CaptionDataset('valid', transform=transforms.Compose([normalize])),
+        #     batch_size=self.batch_size, shuffle=False, pin_memory=True)
+        # print(val_data_loader)
+        # print(len(val_data_loader))
+        # exit(0)
         train_attention_model(self.vocab_size, train_data_loader, val_data_loader)
 
 
